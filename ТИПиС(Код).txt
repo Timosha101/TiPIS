@@ -1,0 +1,104 @@
+# Импорт необходимых библиотек
+import pandas as pd
+import numpy as np
+
+# Загрузка данных
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
+column_names = ['age', 'workclass', 'fnlwgt', 'education', 'education-num', 
+                'marital-status', 'occupation', 'relationship', 'race', 
+                'sex', 'capital-gain', 'capital-loss', 'hours-per-week', 
+                'native-country', 'income']
+
+# Чтение данных
+df = pd.read_csv(url, names=column_names, skipinitialspace=True, na_values='?')
+
+print("="*60)
+print("АНАЛИЗ ДАННЫХ О ДОХОДАХ")
+print("="*60)
+
+# 1) Число столбцов в наборе данных
+print(f"1) ЧИСЛО СТОЛБЦОВ В НАБОРЕ ДАННЫХ: {len(df.columns)}")
+print()
+
+# 2) Есть ли пропуски в данных?
+print("2) АНАЛИЗ ПРОПУЩЕННЫХ ДАННЫХ:")
+print()
+missing_data = df.isnull().sum()
+missing_columns = missing_data[missing_data > 0]
+
+if len(missing_columns) == 0:
+    print("    Пропущенных данных нет")
+else:
+    print(f"    Пропуски найдены в {len(missing_columns)} столбцах:")
+    for col, count in missing_columns.items():
+        print(f"    - {col}: {count} пропусков")
+print()
+
+# 3) Кол-во показателей в столбце расы
+race_categories = df['race'].nunique()
+print(f"3) КОЛИЧЕСТВО УНИКАЛЬНЫХ ЗНАЧЕНИЙ В СТОЛБЦЕ РАСЫ: {race_categories}")
+print()
+
+# 4) Медиана часов в неделю
+median_hours = df['hours-per-week'].median()
+print(f"4) МЕДИАНА ЧАСОВ В НЕДЕЛЮ: {median_hours}")
+print()
+
+# 5) Кого больше - женщин или мужчин с ЗП >50К?
+high_income = df[df['income'] == '>50K']
+gender_count = high_income['sex'].value_counts()
+print("5) РАСПРЕДЕЛЕНИЕ ПО ПОЛУ С ЗП >50К:")
+print()
+print(f"    Мужчины: {gender_count.get('Male', 0)}")
+print(f"    Женщины: {gender_count.get('Female', 0)}")
+print()
+
+difference = gender_count.get('Male', 0) - gender_count.get('Female', 0)
+if gender_count.get('Male', 0) > gender_count.get('Female', 0):
+    print(f"    РЕЗУЛЬТАТ: Мужчин больше (разница: {difference} человек)")
+else:
+    print(f"    РЕЗУЛЬТАТ: Женщин больше (разница: {abs(difference)} человек)")
+print()
+
+# 6) Заполнение пропущенных данных
+print("6) ЗАПОЛНЕНИЕ ПРОПУЩЕННЫХ ДАННЫХ")
+print()
+
+if len(missing_columns) == 0:
+    print("    Пропуски отсутствуют - заполнение не требуется")
+else:
+    print("    Заполнение наиболее встречаемыми значениями:")
+    df_filled = df.copy()
+    for column in df_filled.columns:
+        if df_filled[column].isnull().sum() > 0:
+            most_frequent = df_filled[column].mode()[0]
+            df_filled[column].fillna(most_frequent, inplace=True)
+            print(f"    - {column}: заполнено значением '{most_frequent}'")
+    
+    print("\n    Проверка после заполнения:")
+    print(f"    Осталось пропусков: {df_filled.isnull().sum().sum()}")
+print()
+
+# Альтернативные способы заполнения пропусков
+print("7) АЛЬТЕРНАТИВНЫЕ МЕТОДЫ ЗАПОЛНЕНИЯ ПРОПУСКОВ")
+print()
+print("    Возможные альтернативные методы заполнения пропусков:")
+print()
+print("    Числовые переменные:")
+print("    1. Медиана – устойчивость к выбросам")
+print("    2. Среднее значение – если распределение нормальное")
+print("    3. Интерполяция – для временных рядов")
+print("    4. Предсказание с помощью машинного обучения")
+print("    5. Заполнение константой (0 или -1)")
+print()
+print("    Категориальные переменные:")
+print("    1. Самое частое значение (мода) – как сделано выше")
+print("    2. Значение «Неизвестно» или «Отсутствует»")
+print("    3. Предсказание на основе других признаков")
+print("    4. K-Nearest Neighbours для нахождения похожих записей")
+print("    5. Множественное импутирование (MICE)")
+print()
+
+print("="*60)
+print("АНАЛИЗ ЗАВЕРШЕН")
+print("="*60)
